@@ -1,76 +1,58 @@
-# 🎡 SoftIto Öğrenci Eşleştirme Çarkı
+# 🎡 SoftIto Akademi Eşleştirme & Sektör Dağıtım Çarkı
 
-Bu proje, sınıf içi etkinlikler, proje grupları veya soru-cevap seansları için öğrencileri rastgele, adil ve eğlenceli bir şekilde ikişerli olarak eşleştirmek amacıyla geliştirilmiş modern bir React + Vite web uygulamasıdır.
+Bu proje, sınıf içi etkinliklerde öğrencileri ikişerli gruplara eşleştirmek ve ardından oluşan bu gruplara rastgele proje sektörleri atamak amacıyla geliştirilmiş modern bir React + Vite web uygulamasıdır.
 
-Uygulama, tamamen bağımsız (Tailwind CSS gibi harici çerçevelere ihtiyaç duymayan) özel bir Vanilla CSS tasarım sistemine, sentezlenmiş ses efektlerine ve performans dostu kutlama animasyonlarına sahiptir.
+Uygulama, tamamen bağımsız (Tailwind CSS gibi harici çerçevelere ihtiyaç duymayan) özel bir Vanilla CSS tasarım sistemine, sentetik ses efektlerine ve performans dostu kutlama animasyonlarına sahiptir.
 
 ---
 
 ## ✨ Özellikler
 
-- **🎯 Çift Aşamalı Seçim Akışı:** "Çarkı Çevir" butonuna basıldığında çark sırayla döner; önce birinci öğrenciyi, ardından otomatik olarak ikinci öğrenciyi seçer. Eşleşme tamamlandığında bu iki öğrenci çarktan kalıcı olarak çıkartılır.
-- **🎨 Premium Vanilla CSS Tasarımı:** Koyu tema (Dark Mode) üzerine kurulu, neon mor/pembe/sarı renk paletine sahip, modern cam efekti (glassmorphic) kullanan pürüzsüz arayüz.
-- **🔊 Sentezlenmiş Ses Efektleri:** Harici hiçbir ses dosyasına ihtiyaç duymadan, tarayıcının **Web Audio API** arayüzü kullanılarak gerçek zamanlı sentezlenen çark dönme tıkırtısı (tick) ve eşleşme tebrik melodisi. İstenildiğinde ses tamamen kapatılabilir.
-- **🎉 Canvas Konfeti Animasyonu:** Eşleşme sağlandığı an ekranda patlayan, HTML5 Canvas ile çizilen yüksek performanslı konfeti parçacık efektleri.
-- **💾 Kalıcı Hafıza (LocalStorage):** Kalan öğrenci listesi, yapılan eşleşmelerin geçmişi ve ses ayarı tarayıcı kapansa bile korunur.
-- **↩️ Eşleşmeyi Geri Alma:** Yapılan bir eşleşme iptal edilerek öğrenciler tekrar aktif çark havuzuna dahil edilebilir.
-- **✏️ Öğrenci Listesi Düzenleyici:** Liste düzenleme penceresi sayesinde isim listesi hızlıca güncellenebilir. İsimlerin başındaki numaralar otomatik olarak temizlenir.
-- **📱 Mobil Uyumlu Tasarım:** Farklı ekran boyutlarına göre kendini mükemmel şekilde ölçeklendiren duyarlı yerleşim yapısı.
+Sayfaya girer girmez her iki çark paneli de yan yana görüntülenir ve tamamen bağımsız olarak çalışır:
 
----
+### 👥 1. Öğrenci Eşleştirme Paneli (Sol)
+- **Çift Aşamalı Seçim Akışı:** Çark sırayla döner; önce birinci öğrenciyi, ardından otomatik olarak ikinci öğrenciyi seçer.
+- **Listeden Çıkarma:** Eşleşen öğrenciler çarktan ve kalanlar listesinden çıkarılarak "Yapılan Eşleşmeler" listesine aktarılır.
+- **Geri Alma:** İptal edilen eşleşmelerdeki öğrenciler tekrar çarka dahil edilebilir.
 
-## 📁 Proje Klasör Yapısı
+### 🎯 2. Proje Sektörü Dağıtımı Paneli (Sağ)
+- **Tek Aşamalı Sektör Seçimi:** Sıradaki grup için çark bir kez döner ve kalan sektörlerden birini rastgele seçerek o gruba atar.
+- **Eşleşmelerden Yükleme:** Öğrenci Eşleştirme panelinde oluşan gruplar, tek tıkla doğrudan Sektör Dağıtımı panelinin grup listesine aktarılabilir.
+- **Listeden Çıkarma:** Atanan sektör çarktan ve kalan sektörler listesinden çıkarılır.
 
-```
-student_match/
-├── src/
-│   ├── components/
-│   │   ├── Confetti.jsx       # Canvas konfeti kutlama efekti
-│   │   ├── MatchCard.jsx      # Eşleşme sonucunu gösteren modal kartı
-│   │   └── Wheel.jsx          # SVG tabanlı dinamik dönen çark
-│   ├── utils/
-│   │   └── SoundManager.js    # Web Audio API ses sentezleyici motoru
-│   ├── App.jsx                # Ana uygulama ve state yönetimi
-│   ├── index.css              # Özel tasarım sistemi ve görsel tanımlamalar
-│   └── main.jsx               # React başlangıç noktası
-├── isimler.md                 # Orijinal öğrenci listesi verisi
-├── index.html                 # HTML şablonu (SEO ve meta ayarları ile)
-├── package.json               # Bağımlılıklar ve komutlar
-└── vite.config.js             # Vite yapılandırması
-```
+### 🛠️ Ortak Özellikler
+- **Premium Vanilla CSS Tasarımı:** Koyu tema, yan yana 2 sütunlu masaüstü yerleşimi, neon mor/pembe/sarı gradyan geçişleri ve cam efekti (glassmorphism) kullanan pürüzsüz arayüz.
+- **Sentezlenmiş Ses Efektleri:** Web Audio API kullanılarak sentezlenen çark dönme tıkırtısı ve eşleşme tebrik melodisi.
+- **Canvas Konfeti Animasyonu:** Eşleşme sağlandığında patlayan, HTML5 Canvas ile çizilen yüksek performanslı konfeti parçacık efektleri.
+- **Kalıcı Hafıza (LocalStorage):** Tüm listeler, atamalar ve ses ayarı tarayıcı kapansa dahi korunur.
+- **Listeleri Düzenleme:** Öğrenci veya grup listeleri manuel olarak düzenlenebilir. İsimlerin başındaki numaralar otomatik temizlenir.
 
 ---
 
 ## 🚀 Başlangıç
 
-Projeyi yerel bilgisayarınızda çalıştırmak için aşağıdaki adımları takip edebilirsiniz:
-
 ### 1. Bağımlılıkları Yükleyin
-Proje dizininde terminali açıp aşağıdaki komutu çalıştırın:
 ```bash
 npm install
 ```
 
 ### 2. Geliştirme Sunucusunu Başlatın
-Uygulamayı yerel olarak test etmek için yerel sunucuyu ayağa kaldırın:
 ```bash
 npm run dev
 ```
-Sunucu başladığında terminalde gösterilen adrese (genellikle `http://localhost:5173/`) tarayıcınızdan gidin.
+Yerel sunucu başladığında `http://localhost:5173/` adresine tarayıcınızdan gidin.
 
-### 3. Tarayıcı İçin Üretim Derlemesi Alın
-Uygulamayı canlıya (production) hazırlamak için derleme komutunu çalıştırabilirsiniz:
+### 3. Üretim Derlemesi Alın
 ```bash
 npm run build
 ```
-Oluşan dosyalar `dist/` klasörüne aktarılacaktır.
 
 ---
 
 ## 🛠️ Kullanılan Teknolojiler
 
-- **React 19** - Bileşen tabanlı kullanıcı arayüzü yönetimi
+- **React 19** - Kullanıcı arayüzü yönetimi
 - **Vite 8** - Hızlı derleme ve geliştirme ortamı
 - **Web Audio API** - Sentetik ses üretimi ve kontrolü
 - **HTML5 Canvas** - Konfeti animasyon çizimleri
-- **SVG (Scalable Vector Graphics)** - Matematiksel ve piksel kaybı olmayan çark görselleştirmesi
+- **SVG (Scalable Vector Graphics)** - Matematiksel ve dinamik çark çizimi

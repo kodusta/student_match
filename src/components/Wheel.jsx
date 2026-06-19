@@ -2,21 +2,20 @@ import React, { useEffect, useRef, useState } from 'react';
 import { soundManager } from '../utils/SoundManager';
 
 const COLORS = [
-  '#6366f1', // Indigo
-  '#a855f7', // Purple
-  '#ec4899', // Pink
-  '#3b82f6', // Blue
-  '#14b8a6', // Teal
-  '#f59e0b', // Amber
-  '#10b981', // Emerald
-  '#ef4444', // Red
+  '#6366f1',
+  '#a855f7',
+  '#ec4899',
+  '#3b82f6',
+  '#14b8a6',
+  '#f59e0b',
+  '#10b981',
+  '#ef4444',
 ];
 
-const Wheel = ({ names = [], spinning = false, targetIndex = -1, onSpinComplete }) => {
+const Wheel = ({ names = [], spinning = false, targetIndex = -1, onSpinComplete, size = 320 }) => {
   const wheelRef = useRef(null);
   const [currentRotation, setCurrentRotation] = useState(0);
   
-  // Track ticks during animation
   const animationRef = useRef({
     startTime: 0,
     duration: 5000,
@@ -160,18 +159,15 @@ const Wheel = ({ names = [], spinning = false, targetIndex = -1, onSpinComplete 
   };
 
   return (
-    <div className="wheel-container">
-      {/* Outer Ring & Border */}
-      <div className="wheel-outer-ring">
-        {/* Pointer at the top */}
+    <div className="wheel-container" style={{ width: `${size + 16}px`, height: `${size + 16}px` }}>
+      <div className="wheel-outer-ring" style={{ width: `${size + 16}px`, height: `${size + 16}px` }}>
         <div className="wheel-pointer" />
       </div>
 
-      {/* SVG Canvas for Wheel */}
       <svg
         ref={wheelRef}
-        width="400"
-        height="400"
+        width={size}
+        height={size}
         viewBox="0 0 400 400"
         style={{
           transform: `rotate(${currentRotation}deg)`,
@@ -193,7 +189,6 @@ const Wheel = ({ names = [], spinning = false, targetIndex = -1, onSpinComplete 
           names.map((name, index) => renderSlice(name, index))
         )}
 
-        {/* Center hub */}
         <circle cx="200" cy="200" r="26" fill="#030712" stroke="#f59e0b" strokeWidth="4" />
         <circle cx="200" cy="200" r="8" fill="#f59e0b" />
       </svg>

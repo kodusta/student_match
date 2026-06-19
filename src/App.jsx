@@ -31,6 +31,26 @@ const DEFAULT_NAMES = [
   "Ali Yanar"
 ];
 
+const DEFAULT_SECTORS = [
+  "E-Ticaret / Alışveriş Sitesi",
+  "Teknoloji / Yazılım Ajansı",
+  "Cafe & Restoran Sitesi",
+  "Online Eğitim / Kurs Platformu",
+  "Sağlık / Diş Kliniği Portalı",
+  "Emlak / Gayrimenkul Arama",
+  "Turizm / Otel Rezervasyonu",
+  "Otomotiv / Araç Kiralama",
+  "Spor Salonu / Fitness Merkezi",
+  "Güzellik Salonu / Kuaför",
+  "Organik Tarım & Bahçecilik",
+  "Mimarlık / İç Tasarım Ofisi"
+];
+
+const DEFAULT_GROUPS = [
+  "Grup 1", "Grup 2", "Grup 3", "Grup 4", "Grup 5", "Grup 6",
+  "Grup 7", "Grup 8", "Grup 9", "Grup 10", "Grup 11", "Grup 12"
+];
+
 function App() {
   const [names, setNames] = useState(() => {
     const saved = localStorage.getItem('wheel_names');
@@ -42,21 +62,44 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [sectors, setSectors] = useState(() => {
+    const saved = localStorage.getItem('wheel_sectors');
+    return saved ? JSON.parse(saved) : DEFAULT_SECTORS;
+  });
+
+  const [groups, setGroups] = useState(() => {
+    const saved = localStorage.getItem('wheel_groups');
+    return saved ? JSON.parse(saved) : DEFAULT_GROUPS;
+  });
+
+  const [groupSectors, setGroupSectors] = useState(() => {
+    const saved = localStorage.getItem('wheel_group_sectors');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [soundEnabled, setSoundEnabled] = useState(() => {
     const saved = localStorage.getItem('wheel_sound');
     return saved !== null ? JSON.parse(saved) : true;
   });
 
-  const [spinning, setSpinning] = useState(false);
+  const [studentSpinning, setStudentSpinning] = useState(false);
+  const [sectorSpinning, setSectorSpinning] = useState(false);
   const [spinStage, setSpinStage] = useState(0); 
-  const [targetIndex, setTargetIndex] = useState(-1);
+  
+  const [studentTargetIndex, setStudentTargetIndex] = useState(-1);
+  const [sectorTargetIndex, setSectorTargetIndex] = useState(-1);
+  
   const [student1, setStudent1] = useState(null);
   const [student2, setStudent2] = useState(null);
+  const [selectedSector, setSelectedSector] = useState(null);
+
   const [showMatchModal, setShowMatchModal] = useState(false);
+  const [modalData, setModalData] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
   
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editNamesText, setEditNamesText] = useState('');
+  const [editModalType, setEditModalType] = useState('students'); 
+  const [editModalText, setEditModalText] = useState('');
   const [notification, setNotification] = useState(null);
 
   useEffect(() => {
@@ -66,6 +109,18 @@ function App() {
   useEffect(() => {
     localStorage.setItem('wheel_matches', JSON.stringify(matches));
   }, [matches]);
+
+  useEffect(() => {
+    localStorage.setItem('wheel_sectors', JSON.stringify(sectors));
+  }, [sectors]);
+
+  useEffect(() => {
+    localStorage.setItem('wheel_groups', JSON.stringify(groups));
+  }, [groups]);
+
+  useEffect(() => {
+    localStorage.setItem('wheel_group_sectors', JSON.stringify(groupSectors));
+  }, [groupSectors]);
 
   useEffect(() => {
     localStorage.setItem('wheel_sound', JSON.stringify(soundEnabled));
@@ -79,127 +134,230 @@ function App() {
     }, 4000);
   };
 
-  const startMatching = () => {
-    if (spinning) return;
-    
+  const startStudentMatching = () => {
+    if (studentSpinning || sectorSpinning) return;
     if (names.length < 2) {
       triggerNotification("Eşleştirme yapabilmek için çarkta en az 2 öğrenci olmalıdır!", "error");
       return;
     }
-
     setStudent1(null);
     setStudent2(null);
     setShowConfetti(false);
     
-    const index1 = Math.floor(Math.random() * names.length);
-    setTargetIndex(index1);
+    const index = Math.floor(Math.random() * names.length);
+    setStudentTargetIndex(index);
     setSpinStage(1);
-    setSpinning(true);
+    setStudentSpinning(true);
   };
 
-  const handleSpinComplete = () => {
+  const startSectorAssignment = () => {
+    if (studentSpinning || sectorSpinning) return;
+    if (groupSectors.length >= groups.length) {
+      triggerNotification("Tüm gruplara sektör atandı!", "error");
+      return;
+    }
+    if (sectors.length === 0) {
+      triggerNotification("Dağıtılacak sektör kalmadı!", "error");
+      return;
+    }
+    setSelectedSector(null);
+    setShowConfetti(false);
+
+    const index = Math.floor(Math.random() * sectors.length);
+    setSectorTargetIndex(index);
+    setSpinStage(3); 
+    setSectorSpinning(true);
+  };
+
+  const handleStudentSpinComplete = () => {
     if (spinStage === 1) {
-      const selectedStudent1 = names[targetIndex];
+      const selectedStudent1 = names[studentTargetIndex];
       setStudent1(selectedStudent1);
-      
       const remainingNames = names.filter(n => n !== selectedStudent1);
       
       setTimeout(() => {
         const index2 = Math.floor(Math.random() * remainingNames.length);
         const originalIndex2 = names.indexOf(remainingNames[index2]);
-        
-        setTargetIndex(originalIndex2);
+        setStudentTargetIndex(originalIndex2);
         setSpinStage(2);
-        setSpinning(true);
+        setStudentSpinning(true);
       }, 1500);
 
     } else if (spinStage === 2) {
-      const selectedStudent2 = names[targetIndex];
+      const selectedStudent2 = names[studentTargetIndex];
       setStudent2(selectedStudent2);
-      
-      setSpinning(false);
+      setStudentSpinning(false);
       setSpinStage(0);
+      
+      setModalData({
+        title: "✨ Harika Eşleşme! ✨",
+        subTitle: "Bu iki öğrenci başarıyla eşleştirildi ve çarktan çıkarıldı.",
+        label1: "Öğrenci 1",
+        label2: "Öğrenci 2",
+        val1: student1,
+        val2: selectedStudent2,
+        type: 'student'
+      });
+      
       setShowConfetti(true);
       soundManager.playSuccess();
       setShowMatchModal(true);
     }
   };
 
-  const acceptMatch = () => {
-    if (!student1 || !student2) return;
-
-    const newMatch = {
-      id: Date.now(),
-      p1: student1,
-      p2: student2,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    
-    setMatches(prev => [newMatch, ...prev]);
-    setNames(prev => prev.filter(name => name !== student1 && name !== student2));
-    
-    setStudent1(null);
-    setStudent2(null);
-    setShowMatchModal(false);
-    setShowConfetti(false);
-    
-    triggerNotification("Eşleşme başarıyla kaydedildi ve öğrenciler listeden çıkarıldı.", "success");
+  const handleSectorSpinComplete = () => {
+    if (spinStage === 3) {
+      const selSector = sectors[sectorTargetIndex];
+      setSelectedSector(selSector);
+      setSectorSpinning(false);
+      setSpinStage(0);
+      
+      setModalData({
+        title: "🎯 Proje Sektörü Atandı! 🎯",
+        subTitle: "Grup için rastgele sektör seçildi ve çarktan kaldırıldı.",
+        label1: "Grup",
+        label2: "Proje Sektörü",
+        val1: groups[groupSectors.length],
+        val2: selSector,
+        type: 'sector'
+      });
+      
+      setShowConfetti(true);
+      soundManager.playSuccess();
+      setShowMatchModal(true);
+    }
   };
 
-  const undoMatch = (matchId) => {
+  const acceptModalMatch = () => {
+    if (!modalData) return;
+
+    if (modalData.type === 'student') {
+      const newMatch = {
+        id: Date.now(),
+        p1: modalData.val1,
+        p2: modalData.val2,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMatches(prev => [newMatch, ...prev]);
+      setNames(prev => prev.filter(name => name !== modalData.val1 && name !== modalData.val2));
+      setStudent1(null);
+      setStudent2(null);
+      triggerNotification("Eşleşme kaydedildi ve öğrenciler çarktan çıkarıldı.", "success");
+    } else {
+      const newGroupSector = {
+        id: Date.now(),
+        group: modalData.val1,
+        sector: modalData.val2,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setGroupSectors(prev => [newGroupSector, ...prev]);
+      setSectors(prev => prev.filter(s => s !== modalData.val2));
+      setSelectedSector(null);
+      triggerNotification("Grup sektörü başarıyla atandı ve sektör çarktan çıkarıldı.", "success");
+    }
+    
+    setShowMatchModal(false);
+    setShowConfetti(false);
+    setModalData(null);
+  };
+
+  const undoStudentMatch = (matchId) => {
     const matchToUndo = matches.find(m => m.id === matchId);
     if (!matchToUndo) return;
-
     setNames(prev => {
       const updated = [...prev];
       if (!updated.includes(matchToUndo.p1)) updated.push(matchToUndo.p1);
       if (!updated.includes(matchToUndo.p2)) updated.push(matchToUndo.p2);
       return updated;
     });
-
     setMatches(prev => prev.filter(m => m.id !== matchId));
     triggerNotification(`${matchToUndo.p1} & ${matchToUndo.p2} çifti tekrar çarka eklendi.`, "info");
   };
 
-  const resetAll = () => {
-    if (window.confirm("Tüm eşleşmeleri sıfırlamak ve ilk listeyi geri yüklemek istediğinize emin misiniz?")) {
+  const undoSectorAssignment = (matchId) => {
+    const matchToUndo = groupSectors.find(m => m.id === matchId);
+    if (!matchToUndo) return;
+    setSectors(prev => {
+      const updated = [...prev];
+      if (!updated.includes(matchToUndo.sector)) updated.push(matchToUndo.sector);
+      return updated;
+    });
+    setGroupSectors(prev => prev.filter(m => m.id !== matchId));
+    triggerNotification(`${matchToUndo.group} için atanan ${matchToUndo.sector} sektörü iptal edildi.`, "info");
+  };
+
+  const resetStudents = () => {
+    if (window.confirm("Öğrenci listesini ve eşleşmeleri sıfırlamak istiyor musunuz?")) {
       setNames(DEFAULT_NAMES);
       setMatches([]);
       setStudent1(null);
       setStudent2(null);
       setShowMatchModal(false);
       setShowConfetti(false);
-      triggerNotification("Sistem tamamen sıfırlandı.", "info");
+      triggerNotification("Öğrenci eşleştirme sistemi sıfırlandı.", "info");
     }
   };
 
-  const openEditModal = () => {
-    const text = names.map((name, i) => `${i + 1} ${name}`).join('\n');
-    setEditNamesText(text);
+  const resetSectors = () => {
+    if (window.confirm("Sektör dağılımlarını ve çarktaki sektörleri sıfırlamak istiyor musunuz?")) {
+      setSectors(DEFAULT_SECTORS);
+      setGroupSectors([]);
+      setSelectedSector(null);
+      setShowMatchModal(false);
+      setShowConfetti(false);
+      triggerNotification("Sektör dağıtım sistemi sıfırlandı.", "info");
+    }
+  };
+
+  const openEditModal = (type) => {
+    setEditModalType(type);
+    if (type === 'students') {
+      const text = names.map((name, i) => `${i + 1} ${name}`).join('\n');
+      setEditModalText(text);
+    } else {
+      const text = groups.map((g, i) => `${i + 1} ${g}`).join('\n');
+      setEditModalText(text);
+    }
     setShowEditModal(true);
   };
 
-  const saveEditedNames = () => {
-    const parsedNames = editNamesText
+  const saveEditedList = () => {
+    const parsed = editModalText
       .split('\n')
       .map(line => line.replace(/^\d+\s*/, '').trim())
-      .filter(name => name.length > 0);
+      .filter(item => item.length > 0);
 
-    if (parsedNames.length === 0) {
-      alert("En az 1 geçerli isim girilmelidir!");
+    if (parsed.length === 0) {
+      alert("En az 1 geçerli öğe yazılmalıdır!");
       return;
     }
 
-    setNames(parsedNames);
+    if (editModalType === 'students') {
+      setNames(parsed);
+      triggerNotification(`Öğrenci listesi güncellendi (${parsed.length} öğrenci).`, "success");
+    } else {
+      setGroups(parsed);
+      setGroupSectors([]);
+      triggerNotification(`Grup listesi güncellendi (${parsed.length} grup). Dağıtımlar sıfırlandı.`, "success");
+    }
     setShowEditModal(false);
-    triggerNotification(`Öğrenci listesi güncellendi (${parsedNames.length} öğrenci).`, "success");
+  };
+
+  const importGroupsFromMatches = () => {
+    if (matches.length === 0) {
+      triggerNotification("Henüz yapılmış bir öğrenci eşleşmesi bulunmuyor!", "error");
+      return;
+    }
+    const imported = matches.map((m, i) => `Grup ${i + 1} (${m.p1} & ${m.p2})`);
+    setGroups(imported);
+    setGroupSectors([]);
+    triggerNotification(`${imported.length} adet grup eşleşmelerden başarıyla yüklendi!`, "success");
   };
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
       <Confetti active={showConfetti} />
 
-      {/* Global Notification Banner */}
       {notification && (
         <div className={`notification-banner ${notification.type}`}>
           {notification.message}
@@ -211,13 +369,12 @@ function App() {
         <div className="logo-section">
           <span className="logo-emoji">🎡</span>
           <div>
-            <h1 className="title-main">Öğrenci Eşleştirme Çarkı</h1>
-            <p className="subtitle-main">SoftIto Akademi Eşleştirme Sistemi</p>
+            <h1 className="title-main">SoftIto Akademi Çark Sistemi</h1>
+            <p className="subtitle-main">Grup Eşleştirme & Proje Sektörü Dağıtımı</p>
           </div>
         </div>
-        
+
         <div className="header-actions">
-          {/* Sound Toggle */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
             className="btn btn-icon"
@@ -225,155 +382,232 @@ function App() {
           >
             {soundEnabled ? '🔊' : '🔇'}
           </button>
-          
-          <button
-            onClick={openEditModal}
-            className="btn btn-edit"
-          >
-            ✏️ Düzenle
-          </button>
-          
-          <button
-            onClick={resetAll}
-            className="btn btn-danger"
-          >
-            🔄 Sıfırla
-          </button>
         </div>
       </header>
 
-      {/* Main Layout Container */}
+      {/* Main Layout Grid */}
       <main className="app-container">
         
-        {/* Left Column: Wheel & Action */}
+        {/* Panel 1: Öğrenci Eşleştirme */}
         <section className="panel wheel-section">
-          {/* Active Names Count Badge */}
-          <div className="panel-badge">
-            👥 Kalan Öğrenci: <span>{names.length}</span>
+          <div className="panel-header-section">
+            <h2 className="panel-main-title">👥 Öğrenci Eşleştirme</h2>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <button onClick={() => openEditModal('students')} className="btn btn-edit">✏️ Düzenle</button>
+              <button onClick={resetStudents} className="btn btn-danger">🔄 Sıfırla</button>
+              <div className="panel-badge">Kalan: <span>{names.length}</span></div>
+            </div>
           </div>
 
           <div className="wheel-inner-wrapper">
             <Wheel
               names={names}
-              spinning={spinning}
-              targetIndex={targetIndex}
-              onSpinComplete={handleSpinComplete}
+              spinning={studentSpinning}
+              targetIndex={studentTargetIndex}
+              onSpinComplete={handleStudentSpinComplete}
+              size={320}
             />
           </div>
 
-          {/* Action Spin Button */}
-          <div style={{ width: '100%', maxWidth: '320px', textAlign: 'center' }}>
+          <div style={{ width: '100%', maxWidth: '320px', margin: '0 auto', textAlign: 'center' }}>
             <button
-              onClick={startMatching}
-              disabled={spinning || names.length < 2}
+              onClick={startStudentMatching}
+              disabled={studentSpinning || sectorSpinning || names.length < 2}
               className="btn btn-spin"
             >
-              {spinning 
+              {studentSpinning 
                 ? (spinStage === 1 ? '1. Öğrenci Seçiliyor...' : '2. Öğrenci Seçiliyor...') 
                 : '🎡 Çarkı Çevir & Eşleştir'}
             </button>
             <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.75rem', fontWeight: 500 }}>
-              Her çevrimde çark sırayla iki kişiyi seçer ve eşleştirir.
+              Çark sırayla iki kişiyi seçer, eşleştirir ve havuzdan çıkarır.
             </p>
+          </div>
+
+          <div className="panel-split">
+            <div className="split-list-panel">
+              <h3 className="split-title">Çarktaki Öğrenciler ({names.length})</h3>
+              <div className="student-chips-container">
+                {names.length === 0 ? (
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', width: '100%', padding: '1rem 0' }}>Kalan yok.</p>
+                ) : (
+                  names.map((name, i) => (
+                    <span key={i} className="student-chip">{name}</span>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="split-list-panel">
+              <h3 className="split-title">
+                <span>Yapılan Eşleşmeler ({matches.length})</span>
+                {matches.length > 0 && (
+                  <button onClick={() => { if (window.confirm("Eşleşmeleri temizlemek istiyor musunuz?")) setMatches([]); }} className="btn-clear-history">Temizle</button>
+                )}
+              </h3>
+              <div className="history-list">
+                {matches.length === 0 ? (
+                  <div className="history-empty">
+                    <span className="history-empty-icon">📋</span>
+                    <p style={{ fontSize: '0.75rem' }}>Eşleşme yok.</p>
+                  </div>
+                ) : (
+                  matches.map((match) => (
+                    <div key={match.id} className="match-item">
+                      <div className="match-details">
+                        <div className="match-names">
+                          <span className="name-p1">{match.p1}</span>
+                          <span className="match-vs">ve</span>
+                          <span className="name-p2">{match.p2}</span>
+                        </div>
+                        <span className="match-time">{match.time}</span>
+                      </div>
+                      <button onClick={() => undoStudentMatch(match.id)} className="btn-undo">↩️</button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Right Column: Sidebar (Matches History & Remaining List) */}
-        <section className="sidebar-section">
-          
-          {/* Matches Panel */}
-          <div className="panel sidebar-panel" style={{ height: '380px' }}>
-            <h2 className="panel-title">
-              <span className="panel-title-text">🤝 Yapılan Eşleşmeler ({matches.length})</span>
+        {/* Panel 2: Sektör Dağıtımı */}
+        <section className="panel wheel-section">
+          <div className="panel-header-section">
+            <h2 className="panel-main-title" style={{ background: 'linear-gradient(to right, #ec4899, #f59e0b)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>
+              🎯 Proje Sektörü Dağıtımı
+            </h2>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               {matches.length > 0 && (
-                <button
-                  onClick={() => {
-                    if (window.confirm("Eşleşme geçmişini temizlemek istiyor musunuz? (Öğrenciler çarka geri eklenmez)")) {
-                      setMatches([]);
-                      triggerNotification("Eşleşme geçmişi temizlendi.", "info");
-                    }
-                  }}
-                  className="btn-clear-history"
-                >
-                  Temizle
-                </button>
+                <button onClick={importGroupsFromMatches} className="btn btn-edit" style={{ borderColor: 'rgba(139,92,246,0.3)', color: '#c084fc' }}>Eşleşmelerden Yükle</button>
               )}
-            </h2>
+              <button onClick={() => openEditModal('groups')} className="btn btn-edit">✏️ Düzenle</button>
+              <button onClick={resetSectors} className="btn btn-danger">🔄 Sıfırla</button>
+              <div className="panel-badge badge-sectors">Kalan: <span>{sectors.length}</span></div>
+            </div>
+          </div>
 
-            <div className="history-list">
-              {matches.length === 0 ? (
-                <div className="history-empty">
-                  <span className="history-empty-icon">📋</span>
-                  <p style={{ fontSize: '0.8rem', fontWeight: 600 }}>Henüz bir eşleşme yapılmadı.</p>
-                </div>
-              ) : (
-                matches.map((match) => (
-                  <div key={match.id} className="match-item">
-                    <div className="match-details">
-                      <div className="match-names">
-                        <span className="name-p1">{match.p1}</span>
-                        <span className="match-vs">ve</span>
-                        <span className="name-p2">{match.p2}</span>
-                      </div>
-                      <span className="match-time">{match.time}</span>
-                    </div>
-                    <button
-                      onClick={() => undoMatch(match.id)}
-                      className="btn-undo"
-                      title="Geri Al (Çarka Geri Ekle)"
-                    >
-                      ↩️
-                    </button>
+          <div className="wheel-inner-wrapper">
+            <Wheel
+              names={sectors}
+              spinning={sectorSpinning}
+              targetIndex={sectorTargetIndex}
+              onSpinComplete={handleSectorSpinComplete}
+              size={320}
+            />
+          </div>
+
+          <div style={{ width: '100%', maxWidth: '320px', margin: '0 auto', textAlign: 'center' }}>
+            {groupSectors.length < groups.length && (
+              <div className="current-group-badge">
+                Sıradaki Grup: <span>{groups[groupSectors.length]}</span>
+              </div>
+            )}
+            <button
+              onClick={startSectorAssignment}
+              disabled={studentSpinning || sectorSpinning || groupSectors.length >= groups.length || sectors.length === 0}
+              className="btn btn-spin"
+              style={{ background: 'linear-gradient(135deg, #ec4899 0%, #d946ef 50%, #f59e0b 100%)', boxShadow: '0 4px 20px rgba(236, 72, 153, 0.3)' }}
+            >
+              {sectorSpinning ? 'Sektör Seçiliyor...' : '🎯 Çevir & Sektör Ata'}
+            </button>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.75rem', fontWeight: 500 }}>
+              Sıradaki gruba rastgele proje konusu atar ve sektörü havuzdan çıkarır.
+            </p>
+          </div>
+
+          <div className="panel-split">
+            <div className="split-list-panel">
+              <h3 className="split-title">Dağıtılacak Gruplar ({groups.length})</h3>
+              <div className="student-chips-container">
+                {groups.length === 0 ? (
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', width: '100%', padding: '1rem 0' }}>Grup yok.</p>
+                ) : (
+                  groups.map((g, i) => {
+                    const isAssigned = groupSectors.some(gs => gs.group === g);
+                    return (
+                      <span 
+                        key={i} 
+                        className="student-chip"
+                        style={{
+                          opacity: isAssigned ? 0.35 : 1,
+                          textDecoration: isAssigned ? 'line-through' : 'none',
+                          borderColor: isAssigned ? 'transparent' : 'rgba(255,255,255,0.08)'
+                        }}
+                      >
+                        {g}
+                      </span>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            <div className="split-list-panel">
+              <h3 className="split-title">
+                <span>Atanan Konular ({groupSectors.length})</span>
+                {groupSectors.length > 0 && (
+                  <button onClick={() => { if (window.confirm("Atamaları temizlemek istiyor musunuz?")) setGroupSectors([]); }} className="btn-clear-history">Temizle</button>
+                )}
+              </h3>
+              <div className="history-list">
+                {groupSectors.length === 0 ? (
+                  <div className="history-empty">
+                    <span className="history-empty-icon">🎯</span>
+                    <p style={{ fontSize: '0.75rem' }}>Atama yok.</p>
                   </div>
-                ))
-              )}
+                ) : (
+                  groupSectors.map((gs) => (
+                    <div key={gs.id} className="match-item">
+                      <div className="match-details">
+                        <div className="match-names">
+                          <span className="name-p1">{gs.group}</span>
+                          <span className="match-vs">➜</span>
+                          <span className="name-p2" style={{ color: '#fbbf24' }}>{gs.sector}</span>
+                        </div>
+                        <span className="match-time">{gs.time}</span>
+                      </div>
+                      <button onClick={() => undoSectorAssignment(gs.id)} className="btn-undo">↩️</button>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
-
-          {/* Remaining Student Chips Panel */}
-          <div className="panel sidebar-panel" style={{ height: '280px' }}>
-            <h2 className="panel-title">
-              <span className="panel-title-text">👤 Çarktaki Öğrenciler ({names.length})</span>
-            </h2>
-            <div className="student-chips-container">
-              {names.length === 0 ? (
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', width: '100%', textAlign: 'center', padding: '2rem 0' }}>
-                  Kalan öğrenci yok. Çark sıfırlanabilir.
-                </p>
-              ) : (
-                names.map((name, index) => (
-                  <span key={index} className="student-chip">
-                    {name}
-                  </span>
-                ))
-              )}
-            </div>
-          </div>
-
         </section>
 
       </main>
 
-      {/* Match Announcement Overlay Modal */}
-      <MatchCard
-        student1={student1}
-        student2={student2}
-        isComplete={student1 !== null && student2 !== null && !spinning}
-        onAccept={acceptMatch}
-      />
+      {/* Celebration Modal Overlay */}
+      {showMatchModal && modalData && (
+        <MatchCard
+          title={modalData.title}
+          subTitle={modalData.subTitle}
+          label1={modalData.label1}
+          label2={modalData.label2}
+          val1={modalData.val1}
+          val2={modalData.val2}
+          isComplete={true}
+          onAccept={acceptModalMatch}
+        />
+      )}
 
-      {/* Edit Names Modal */}
+      {/* Edit List Modal */}
       {showEditModal && (
         <div className="modal-backdrop">
           <div className="modal-content">
-            <h3 className="modal-title">✏️ Öğrenci Listesini Düzenle</h3>
-            <p className="modal-desc">Her satıra bir isim yazın. Numaralandırma varsa otomatik temizlenecektir.</p>
+            <h3 className="modal-title">
+              ✏️ {editModalType === 'students' ? 'Öğrenci Listesini Düzenle' : 'Grup Listesini Düzenle'}
+            </h3>
+            <p className="modal-desc">
+              Her satıra bir tane yazın. Numaralar otomatik temizlenecektir.
+            </p>
             
             <textarea
-              value={editNamesText}
-              onChange={(e) => setEditNamesText(e.target.value)}
+              value={editModalText}
+              onChange={(e) => setEditModalText(e.target.value)}
               className="textarea-input"
-              placeholder="Örnek:&#10;1 Ahmet Yılmaz&#10;2 Mehmet Kaya"
+              placeholder={editModalType === 'students' ? "Örnek:\n1 Ahmet Yılmaz\n2 Mehmet Kaya" : "Örnek:\n1 Grup 1 (Ahmet & Mehmet)\n2 Grup 2 (Ayşe & Fatma)"}
             />
             
             <div className="modal-footer">
@@ -384,7 +618,7 @@ function App() {
                 İptal
               </button>
               <button
-                onClick={saveEditedNames}
+                onClick={saveEditedList}
                 className="btn btn-modal-save"
               >
                 Değişiklikleri Kaydet
