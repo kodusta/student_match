@@ -414,6 +414,10 @@ body {
   color: #f472b6;
 }
 
+.name-p3 {
+  color: #fbbf24;
+}
+
 .match-vs {
   font-size: 0.7rem;
   color: var(--text-muted);
@@ -612,6 +616,11 @@ body {
   box-shadow: 0 0 25px rgba(236, 72, 153, 0.15);
 }
 
+.match-student-box.active-p3 {
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.15);
+}
+
 .match-box-label {
   font-size: 0.7rem;
   font-weight: 800;
@@ -623,6 +632,7 @@ body {
 
 .match-box-label.lbl-p1 { color: #a78bfa; }
 .match-box-label.lbl-p2 { color: #f472b6; }
+.match-box-label.lbl-p3 { color: #f59e0b; }
 
 .match-box-name {
   font-size: 1.25rem;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Wheel from './components/Wheel';
 import MatchCard from './components/MatchCard';
 import Confetti from './components/Confetti';
@@ -32,23 +32,19 @@ const DEFAULT_NAMES = [
 ];
 
 const DEFAULT_SECTORS = [
-  "E-Ticaret / Alışveriş Sitesi",
-  "Teknoloji / Yazılım Ajansı",
-  "Cafe & Restoran Sitesi",
-  "Online Eğitim / Kurs Platformu",
-  "Sağlık / Diş Kliniği Portalı",
-  "Emlak / Gayrimenkul Arama",
-  "Turizm / Otel Rezervasyonu",
-  "Otomotiv / Araç Kiralama",
-  "Spor Salonu / Fitness Merkezi",
-  "Güzellik Salonu / Kuaför",
-  "Organik Tarım & Bahçecilik",
-  "Mimarlık / İç Tasarım Ofisi"
+  "Yapay Zeka Destekli Kişisel Asistan",
+  "Siber Güvenlik / Şifre Kasası",
+  "Fintech / Kişisel Bütçe ve Yatırım Takibi",
+  "Oyunlaştırılmış Alışkanlık & Görev Yöneticisi",
+  "Akıllı Ev Otomasyonu IoT Kontrol Paneli",
+  "NFT ve Dijital Sanat Pazaryeri",
+  "Evcil Hayvan Sağlık & Veteriner Randevu Portalı",
+  "Gönüllülük Ağı ve Sosyal Sorumluluk Platformu"
 ];
 
 const DEFAULT_GROUPS = [
   "Grup 1", "Grup 2", "Grup 3", "Grup 4", "Grup 5", "Grup 6",
-  "Grup 7", "Grup 8", "Grup 9", "Grup 10", "Grup 11", "Grup 12"
+  "Grup 7", "Grup 8"
 ];
 
 function App() {
@@ -91,7 +87,6 @@ function App() {
   
   const [student1, setStudent1] = useState(null);
   const [student2, setStudent2] = useState(null);
-  const [selectedSector, setSelectedSector] = useState(null);
 
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [modalData, setModalData] = useState(null);
@@ -136,8 +131,8 @@ function App() {
 
   const startStudentMatching = () => {
     if (studentSpinning || sectorSpinning) return;
-    if (names.length < 2) {
-      triggerNotification("Eşleştirme yapabilmek için çarkta en az 2 öğrenci olmalıdır!", "error");
+    if (names.length < 3) {
+      triggerNotification("Eşleştirme yapabilmek için çarkta en az 3 öğrenci olmalıdır!", "error");
       return;
     }
     setStudent1(null);
@@ -160,12 +155,11 @@ function App() {
       triggerNotification("Dağıtılacak sektör kalmadı!", "error");
       return;
     }
-    setSelectedSector(null);
     setShowConfetti(false);
 
     const index = Math.floor(Math.random() * sectors.length);
     setSectorTargetIndex(index);
-    setSpinStage(3); 
+    setSpinStage(4); 
     setSectorSpinning(true);
   };
 
@@ -186,16 +180,30 @@ function App() {
     } else if (spinStage === 2) {
       const selectedStudent2 = names[studentTargetIndex];
       setStudent2(selectedStudent2);
+      const remainingNames = names.filter(n => n !== student1 && n !== selectedStudent2);
+      
+      setTimeout(() => {
+        const index3 = Math.floor(Math.random() * remainingNames.length);
+        const originalIndex3 = names.indexOf(remainingNames[index3]);
+        setStudentTargetIndex(originalIndex3);
+        setSpinStage(3);
+        setStudentSpinning(true);
+      }, 1500);
+
+    } else if (spinStage === 3) {
+      const selectedStudent3 = names[studentTargetIndex];
       setStudentSpinning(false);
       setSpinStage(0);
       
       setModalData({
         title: "✨ Harika Eşleşme! ✨",
-        subTitle: "Bu iki öğrenci başarıyla eşleştirildi ve çarktan çıkarıldı.",
+        subTitle: "Bu üç öğrenci başarıyla eşleştirildi ve çarktan çıkarıldı.",
         label1: "Öğrenci 1",
         label2: "Öğrenci 2",
+        label3: "Öğrenci 3",
         val1: student1,
-        val2: selectedStudent2,
+        val2: student2,
+        val3: selectedStudent3,
         type: 'student'
       });
       
@@ -206,9 +214,8 @@ function App() {
   };
 
   const handleSectorSpinComplete = () => {
-    if (spinStage === 3) {
+    if (spinStage === 4) {
       const selSector = sectors[sectorTargetIndex];
-      setSelectedSector(selSector);
       setSectorSpinning(false);
       setSpinStage(0);
       
@@ -236,10 +243,11 @@ function App() {
         id: Date.now(),
         p1: modalData.val1,
         p2: modalData.val2,
+        p3: modalData.val3,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMatches(prev => [newMatch, ...prev]);
-      setNames(prev => prev.filter(name => name !== modalData.val1 && name !== modalData.val2));
+      setNames(prev => prev.filter(name => name !== modalData.val1 && name !== modalData.val2 && name !== modalData.val3));
       setStudent1(null);
       setStudent2(null);
       triggerNotification("Eşleşme kaydedildi ve öğrenciler çarktan çıkarıldı.", "success");
@@ -252,7 +260,6 @@ function App() {
       };
       setGroupSectors(prev => [newGroupSector, ...prev]);
       setSectors(prev => prev.filter(s => s !== modalData.val2));
-      setSelectedSector(null);
       triggerNotification("Grup sektörü başarıyla atandı ve sektör çarktan çıkarıldı.", "success");
     }
     
@@ -268,10 +275,11 @@ function App() {
       const updated = [...prev];
       if (!updated.includes(matchToUndo.p1)) updated.push(matchToUndo.p1);
       if (!updated.includes(matchToUndo.p2)) updated.push(matchToUndo.p2);
+      if (!updated.includes(matchToUndo.p3)) updated.push(matchToUndo.p3);
       return updated;
     });
     setMatches(prev => prev.filter(m => m.id !== matchId));
-    triggerNotification(`${matchToUndo.p1} & ${matchToUndo.p2} çifti tekrar çarka eklendi.`, "info");
+    triggerNotification(`${matchToUndo.p1}, ${matchToUndo.p2} & ${matchToUndo.p3} üçlüsü tekrar çarka eklendi.`, "info");
   };
 
   const undoSectorAssignment = (matchId) => {
@@ -302,7 +310,6 @@ function App() {
     if (window.confirm("Sektör dağılımlarını ve çarktaki sektörleri sıfırlamak istiyor musunuz?")) {
       setSectors(DEFAULT_SECTORS);
       setGroupSectors([]);
-      setSelectedSector(null);
       setShowMatchModal(false);
       setShowConfetti(false);
       triggerNotification("Sektör dağıtım sistemi sıfırlandı.", "info");
@@ -348,7 +355,7 @@ function App() {
       triggerNotification("Henüz yapılmış bir öğrenci eşleşmesi bulunmuyor!", "error");
       return;
     }
-    const imported = matches.map((m, i) => `Grup ${i + 1} (${m.p1} & ${m.p2})`);
+    const imported = matches.map((m, i) => `Grup ${i + 1} (${m.p1} & ${m.p2} & ${m.p3})`);
     setGroups(imported);
     setGroupSectors([]);
     triggerNotification(`${imported.length} adet grup eşleşmelerden başarıyla yüklendi!`, "success");
@@ -412,15 +419,15 @@ function App() {
           <div style={{ width: '100%', maxWidth: '320px', margin: '0 auto', textAlign: 'center' }}>
             <button
               onClick={startStudentMatching}
-              disabled={studentSpinning || sectorSpinning || names.length < 2}
+              disabled={studentSpinning || sectorSpinning || names.length < 3}
               className="btn btn-spin"
             >
               {studentSpinning 
-                ? (spinStage === 1 ? '1. Öğrenci Seçiliyor...' : '2. Öğrenci Seçiliyor...') 
+                ? (spinStage === 1 ? '1. Öğrenci Seçiliyor...' : spinStage === 2 ? '2. Öğrenci Seçiliyor...' : '3. Öğrenci Seçiliyor...') 
                 : '🎡 Çarkı Çevir & Eşleştir'}
             </button>
             <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.75rem', fontWeight: 500 }}>
-              Çark sırayla iki kişiyi seçer, eşleştirir ve havuzdan çıkarır.
+              Çark sırayla üç kişiyi seçer, eşleştirir ve havuzdan çıkarır.
             </p>
           </div>
 
@@ -457,8 +464,10 @@ function App() {
                       <div className="match-details">
                         <div className="match-names">
                           <span className="name-p1">{match.p1}</span>
-                          <span className="match-vs">ve</span>
+                          <span className="match-vs">,</span>
                           <span className="name-p2">{match.p2}</span>
+                          <span className="match-vs">ve</span>
+                          <span className="name-p3">{match.p3}</span>
                         </div>
                         <span className="match-time">{match.time}</span>
                       </div>
@@ -585,8 +594,10 @@ function App() {
           subTitle={modalData.subTitle}
           label1={modalData.label1}
           label2={modalData.label2}
+          label3={modalData.label3}
           val1={modalData.val1}
           val2={modalData.val2}
+          val3={modalData.val3}
           isComplete={true}
           onAccept={acceptModalMatch}
         />

@@ -3,7 +3,7 @@
 3 Muhammet Görkem İskeçeli
 4 Beyza Mensur
 5 Merve Daşçi
-6 Berivan Alpagu
+6 Selahaddin ÇİFTÇİ
 7 Hale Alacan
 8 Aslınur Gündüzalp
 9 Ezgi Kuzu
